@@ -1,25 +1,25 @@
 import {
   Activity,
+  BarChart3,
   Bell,
   Building2,
   Clock3,
-  Database,
   FileCheck2,
   FileClock,
   FileHeart,
-  FileKey2,
   FileLock2,
   FileText,
   Folder,
-  Gauge,
   HardDrive,
   HelpCircle,
-  History,
   KeyRound,
+  LayoutDashboard,
   Link2,
   ListChecks,
   LockKeyhole,
+  ScrollText,
   Settings,
+  Share2,
   ShieldAlert,
   Tags,
   Trash2,
@@ -27,7 +27,7 @@ import {
   Users,
 } from "lucide-react";
 
-const allInternalRoles = [
+const allRoles = [
   "super_admin",
   "organization_admin",
   "security_officer",
@@ -35,7 +35,12 @@ const allInternalRoles = [
   "employee",
 ];
 
-const adminRoles = ["super_admin", "organization_admin"];
+const managementRoles = [
+  "super_admin",
+  "organization_admin",
+  "security_officer",
+  "department_manager",
+];
 
 const securityRoles = [
   "super_admin",
@@ -43,104 +48,104 @@ const securityRoles = [
   "security_officer",
 ];
 
-const managerRoles = [
+const adminRoles = [
   "super_admin",
   "organization_admin",
-  "security_officer",
-  "department_manager",
 ];
 
 export const navigationGroups = [
   {
-    label: "Main",
-
+    label: "Overview",
     items: [
       {
         label: "Dashboard",
         path: "/app/dashboard",
-        icon: Gauge,
-        roles: allInternalRoles,
+        icon: LayoutDashboard,
+        roles: allRoles,
       },
     ],
   },
 
   {
-    label: "Files",
-
+    label: "File Management",
     items: [
       {
         label: "My Files",
         path: "/app/files",
         icon: FileText,
-        roles: allInternalRoles,
+        roles: allRoles,
       },
       {
         label: "Shared With Me",
         path: "/app/files/shared-with-me",
         icon: FileCheck2,
-        roles: allInternalRoles,
+        roles: allRoles,
       },
       {
         label: "Shared By Me",
         path: "/app/files/shared-by-me",
-        icon: FileKey2,
-        roles: allInternalRoles,
+        icon: Share2,
+        roles: allRoles,
       },
       {
         label: "Recent Files",
         path: "/app/files/recent",
         icon: FileClock,
-        roles: allInternalRoles,
+        roles: allRoles,
       },
       {
         label: "Favorites",
         path: "/app/files/favorites",
         icon: FileHeart,
-        roles: allInternalRoles,
+        roles: allRoles,
       },
       {
         label: "Folders",
         path: "/app/folders",
         icon: Folder,
-        roles: allInternalRoles,
+        roles: allRoles,
       },
       {
         label: "Trash",
         path: "/app/files/trash",
         icon: Trash2,
-        roles: allInternalRoles,
+        roles: allRoles,
       },
     ],
   },
 
   {
     label: "Sharing & Approvals",
-
     items: [
+      {
+        label: "Secure Share",
+        path: "/app/share/new",
+        icon: Share2,
+        roles: allRoles,
+      },
       {
         label: "Approval Center",
         path: "/app/approvals",
         icon: ListChecks,
-        roles: allInternalRoles,
+        roles: allRoles,
       },
       {
         label: "Secure Links",
         path: "/app/secure-links",
         icon: Link2,
-        roles: managerRoles,
+        roles: managementRoles,
       },
       {
         label: "Access Requests",
         path: "/app/access-requests",
         icon: KeyRound,
-        roles: managerRoles,
+        roles: managementRoles,
       },
     ],
   },
 
   {
     label: "Security",
-
     items: [
       {
         label: "Security Monitoring",
@@ -151,11 +156,11 @@ export const navigationGroups = [
       {
         label: "Audit Logs",
         path: "/app/security/audit-logs",
-        icon: History,
+        icon: ScrollText,
         roles: securityRoles,
       },
       {
-        label: "Encryption Management",
+        label: "Encryption",
         path: "/app/security/encryption",
         icon: FileLock2,
         roles: securityRoles,
@@ -170,14 +175,13 @@ export const navigationGroups = [
         label: "Active Sessions",
         path: "/app/security/sessions",
         icon: Activity,
-        roles: allInternalRoles,
+        roles: allRoles,
       },
     ],
   },
 
   {
     label: "Administration",
-
     items: [
       {
         label: "Users",
@@ -204,7 +208,7 @@ export const navigationGroups = [
         roles: adminRoles,
       },
       {
-        label: "Storage Management",
+        label: "Storage",
         path: "/app/admin/storage",
         icon: HardDrive,
         roles: adminRoles,
@@ -212,11 +216,11 @@ export const navigationGroups = [
       {
         label: "Reports",
         path: "/app/reports",
-        icon: Database,
-        roles: managerRoles,
+        icon: BarChart3,
+        roles: managementRoles,
       },
       {
-        label: "Organization Settings",
+        label: "Settings",
         path: "/app/settings",
         icon: Settings,
         roles: adminRoles,
@@ -231,26 +235,25 @@ export const navigationGroups = [
   },
 
   {
-    label: "Personal & Support",
-
+    label: "Account",
     items: [
       {
         label: "Notifications",
         path: "/app/notifications",
         icon: Bell,
-        roles: allInternalRoles,
+        roles: allRoles,
       },
       {
         label: "My Profile",
         path: "/app/profile",
         icon: UserCircle,
-        roles: allInternalRoles,
+        roles: allRoles,
       },
       {
         label: "Help & Support",
         path: "/app/help",
         icon: HelpCircle,
-        roles: allInternalRoles,
+        roles: allRoles,
       },
     ],
   },

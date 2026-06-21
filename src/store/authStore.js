@@ -1,104 +1,162 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
-const demoUsers = {
-  "super.admin@afess.com": {
+const wait = (duration = 600) =>
+  new Promise((resolve) => {
+    window.setTimeout(resolve, duration);
+  });
+
+const frontendUsers = [
+  {
     id: "USR-001",
-    fullName: "Abdirahman Hassan",
+    username: "superadmin",
     email: "super.admin@afess.com",
+    password: "Secure@123",
+    fullName: "Abdirahman Hassan",
     role: "super_admin",
     roleLabel: "Super Admin",
     department: "Information Technology",
-    avatar: null,
+    dashboardPath: "/app/dashboard",
   },
-
-  "admin@afess.com": {
+  {
     id: "USR-002",
-    fullName: "Ahmed Hassan",
+    username: "admin",
     email: "admin@afess.com",
+    password: "Secure@123",
+    fullName: "Ahmed Hassan",
     role: "organization_admin",
     roleLabel: "Organization Admin",
     department: "Administration",
-    avatar: null,
+    dashboardPath: "/app/dashboard",
   },
-
-  "security@afess.com": {
+  {
     id: "USR-003",
-    fullName: "Fatima Noor",
+    username: "security",
     email: "security@afess.com",
+    password: "Secure@123",
+    fullName: "Fatima Noor",
     role: "security_officer",
     roleLabel: "Security Officer",
     department: "Information Security",
-    avatar: null,
+    dashboardPath: "/app/dashboard",
   },
-
-  "manager@afess.com": {
+  {
     id: "USR-004",
-    fullName: "Mohamed Ali",
+    username: "manager",
     email: "manager@afess.com",
+    password: "Secure@123",
+    fullName: "Mohamed Ali",
     role: "department_manager",
     roleLabel: "Department Manager",
     department: "Finance",
-    avatar: null,
+    dashboardPath: "/app/dashboard",
   },
-
-  "employee@afess.com": {
+  {
     id: "USR-005",
-    fullName: "Amina Yusuf",
+    username: "employee",
     email: "employee@afess.com",
+    password: "Secure@123",
+    fullName: "Amina Yusuf",
     role: "employee",
     roleLabel: "Employee",
     department: "Finance",
-    avatar: null,
+    dashboardPath: "/app/dashboard",
   },
+];
+
+const removePassword = (user) => {
+  const { password, ...safeUser } = user;
+  return safeUser;
 };
 
 const useAuthStore = create(
   persist(
     (set) => ({
       user: null,
-      accessToken: null,
+      pendingAuth: null,
       isAuthenticated: false,
-      isLoading: false,
+      isInitializing: false,
+      isSubmitting: false,
+      error: null,
 
-      login: async ({ email, password }) => {
-        set({ isLoading: true });
+      initializeAuth: async () => {
+        set({
+          isInitializing: false,
+        });
+      },
 
-        await new Promise((resolve) => {
-          window.setTimeout(resolve, 600);
+      login: async ({ identifier, password }) => {
+        set({
+          isSubmitting: true,
+          error: null,
         });
 
-        const normalizedEmail = email.trim().toLowerCase();
-        const user = demoUsers[normalizedEmail];
+        await wait();
 
-        if (!user || password !== "Secure@123") {
-          set({ isLoading: false });
+        const normalizedIdentifier = identifier
+          .trim()
+          .toLowerCase();
 
-          throw new Error(
-            "Invalid email or password. Please check your credentials."
-          );
+        const matchedUser = frontendUsers.find(
+          (user) =>
+            user.username.toLowerCase() === normalizedIdentifier ||
+            user.email.toLowerCase() === normalizedIdentifier
+        );
+
+        if (!matchedUser || matchedUser.password !== password) {
+          const message =
+            "Username, email, or password is incorrect.";
+
+          set({
+            user: null,
+            isAuthenticated: false,
+            isSubmitting: false,
+            error: message,
+          });
+
+          throw new Error(message);
         }
 
+        const safeUser = removePassword(matchedUser);
+
         set({
-          user,
-          accessToken: "mock-afess-access-token",
+          user: safeUser,
+          pendingAuth: null,
           isAuthenticated: true,
-          isLoading: false,
+          isSubmitting: false,
+          error: null,
         });
 
-        return user;
+        return {
+          requiresOtp: false,
+          user: safeUser,
+        };
       },
 
       logout: () => {
         set({
           user: null,
-          accessToken: null,
+          pendingAuth: null,
           isAuthenticated: false,
-          isLoading: false,
+          isSubmitting: false,
+          error: null,
         });
       },
 
-      updateUser: (changes) => {
+      clearError: () => {
+        set({
+          error: null,
+        });
+      },
+
+      clearPendingAuthentication: () => {
+        set({
+          pendingAuth: null,
+          error: null,
+        });
+      },
+
+      updateCurrentUser: (changes) => {
         set((state) => ({
           user: state.user
             ? {
@@ -110,11 +168,10 @@ const useAuthStore = create(
       },
     }),
     {
-      name: "afess-auth-storage",
+      name: "afess-frontend-auth",
 
       partialize: (state) => ({
         user: state.user,
-        accessToken: state.accessToken,
         isAuthenticated: state.isAuthenticated,
       }),
     }

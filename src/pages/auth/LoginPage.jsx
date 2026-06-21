@@ -1,256 +1,343 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
 import {
+  ArrowRight,
   CheckCircle2,
   Eye,
   EyeOff,
-  FileLock2,
+  FolderLock,
   LockKeyhole,
   Mail,
   ShieldCheck,
 } from "lucide-react";
-import { Link, useLocation, useNavigate } from "react-router";
+
+import {
+  useLocation,
+  useNavigate,
+} from "react-router";
+
 import toast from "react-hot-toast";
 
-import BrandLogo from "../../components/layout/BrandLogo";
-import Button from "../../components/common/Button";
+import AuthImageSlider from "../../components/auth/AuthImageSlider";
+import authService from "../../services/authService";
 import useAuthStore from "../../store/authStore";
-
-const demoAccounts = [
-  {
-    role: "Super Admin",
-    email: "super.admin@afess.com",
-  },
-  {
-    role: "Organization Admin",
-    email: "admin@afess.com",
-  },
-  {
-    role: "Security Officer",
-    email: "security@afess.com",
-  },
-  {
-    role: "Department Manager",
-    email: "manager@afess.com",
-  },
-  {
-    role: "Employee",
-    email: "employee@afess.com",
-  },
-];
 
 export default function LoginPage() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const login = useAuthStore((state) => state.login);
-  const isLoading = useAuthStore((state) => state.isLoading);
-
-  const [email, setEmail] = useState(
-    "admin@afess.com"
+  const login = useAuthStore(
+    (state) => state.login
   );
 
-  const [password, setPassword] = useState(
-    "Secure@123"
+  const clearError = useAuthStore(
+    (state) => state.clearError
   );
+
+  const isSubmitting = useAuthStore(
+    (state) => state.isSubmitting
+  );
+
+  const storeError = useAuthStore(
+    (state) => state.error
+  );
+
+  const [form, setForm] = useState({
+    identifier: "",
+    password: "",
+    rememberDevice: false,
+  });
 
   const [showPassword, setShowPassword] =
     useState(false);
 
-  const [rememberDevice, setRememberDevice] =
-    useState(true);
+  const [validationErrors, setValidationErrors] =
+    useState({});
 
-  const [error, setError] = useState("");
+  useEffect(() => {
+    clearError();
+  }, [clearError]);
+
+  const updateField = (field, value) => {
+    setForm((current) => ({
+      ...current,
+      [field]: value,
+    }));
+
+    setValidationErrors((current) => ({
+      ...current,
+      [field]: "",
+    }));
+
+    clearError();
+  };
+
+  const validateForm = () => {
+    const errors = {};
+
+    if (!form.identifier.trim()) {
+      errors.identifier =
+        "Username or corporate email is required.";
+    }
+
+    if (!form.password) {
+      errors.password =
+        "Password is required.";
+    }
+
+    setValidationErrors(errors);
+
+    return Object.keys(errors).length === 0;
+  };
+
+  const getDestination = (user) => {
+    const requestedPage =
+      location.state?.from;
+
+    if (
+      typeof requestedPage === "string" &&
+      requestedPage.startsWith("/app")
+    ) {
+      return requestedPage;
+    }
+
+    return (
+      user.dashboardPath ||
+      "/app/dashboard"
+    );
+  };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-    setError("");
 
-    if (!email.trim() || !password.trim()) {
-      setError("Email and password are required.");
+    if (!validateForm()) {
       return;
     }
 
     try {
-      await login({
-        email,
-        password,
-        rememberDevice,
-      });
+      const result = await login(form);
 
-      toast.success("Signed in successfully.");
+      if (result.requiresOtp) {
+        toast.success(
+          "A verification code has been sent."
+        );
 
-      const redirectPath =
-        location.state?.from || "/app/dashboard";
+        navigate("/verify-otp", {
+          replace: true,
+          state: {
+            from: location.state?.from,
+          },
+        });
 
-      navigate(redirectPath, {
-        replace: true,
-      });
-    } catch (loginError) {
-      setError(loginError.message);
+        return;
+      }
+
+      toast.success(
+        `Welcome, ${result.user.fullName}`
+      );
+
+      navigate(
+        getDestination(result.user),
+        {
+          replace: true,
+        }
+      );
+    } catch {
+      /*
+       * Error message is rendered from authStore.
+       */
     }
   };
 
+  const handleGoogleLogin = () => {
+    window.location.assign(
+      authService.getGoogleLoginUrl()
+    );
+  };
+
   return (
-    <div className="grid min-h-screen lg:grid-cols-[1.1fr_0.9fr]">
-      <section className="relative hidden overflow-hidden bg-navy px-12 py-10 text-white lg:flex lg:flex-col">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,rgba(11,94,215,0.45),transparent_35%),radial-gradient(circle_at_bottom_left,rgba(22,163,74,0.3),transparent_35%)]" />
+    <main className="fixed inset-0 grid h-dvh w-full overflow-hidden bg-white lg:grid-cols-[1.08fr_0.92fr]">
+      <AuthImageSlider />
 
-        <div className="relative z-10">
-          <BrandLogo light />
-        </div>
+      <section className="relative flex h-dvh min-h-0 items-center justify-center overflow-y-auto bg-white px-5 py-5 sm:px-8 lg:overflow-hidden lg:px-10 xl:px-16">
+        <div className="pointer-events-none absolute -right-32 -top-32 h-80 w-80 rounded-full bg-blue-100/60 blur-3xl" />
 
-        <div className="relative z-10 my-auto max-w-xl">
-          <div className="mb-7 flex h-16 w-16 items-center justify-center rounded-2xl bg-white/10 backdrop-blur">
-            <FileLock2 size={32} />
-          </div>
+        <div className="pointer-events-none absolute -bottom-40 -left-40 h-96 w-96 rounded-full bg-green-100/50 blur-3xl" />
 
-          <h1 className="text-4xl font-bold leading-tight xl:text-5xl">
-            Protect Every File.
-            <br />
-            Control Every Share.
-          </h1>
-
-          <p className="mt-5 max-w-lg text-base leading-7 text-white/70">
-            Automatically encrypt, organize, monitor, and securely
-            share sensitive corporate information from one trusted
-            platform.
-          </p>
-
-          <div className="mt-9 grid gap-4 sm:grid-cols-2">
-            {[
-              "AES-256 file protection",
-              "Role-based access control",
-              "Secure approval workflow",
-              "Continuous activity monitoring",
-            ].map((feature) => (
-              <div
-                key={feature}
-                className="flex items-center gap-3 text-sm text-white/85"
-              >
-                <CheckCircle2
-                  size={18}
-                  className="text-green-400"
-                />
-
-                {feature}
+        <div className="relative z-10 w-full max-w-[450px]">
+          <header className="mb-6">
+            <div className="mb-5 flex items-center gap-3 lg:hidden">
+              <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 via-green-600 to-orange-500 text-white shadow-lg">
+                <FolderLock size={23} />
               </div>
-            ))}
-          </div>
-        </div>
 
-        <p className="relative z-10 text-xs text-white/45">
-          AFESS SecureShare · Corporate Data Protection
-        </p>
-      </section>
+              <div>
+                <p className="font-bold text-slate-950">
+                  AFESS SecureShare
+                </p>
 
-      <section className="flex items-center justify-center bg-white px-5 py-10 sm:px-8">
-        <div className="w-full max-w-md">
-          <div className="mb-8 lg:hidden">
-            <BrandLogo />
-          </div>
+                <p className="text-xs text-slate-500">
+                  Corporate Data Protection
+                </p>
+              </div>
+            </div>
 
-          <div className="mb-8">
-            <p className="mb-2 text-sm font-semibold text-primary">
+            <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+              <ShieldCheck size={23} />
+            </div>
+
+            <p className="text-xs font-bold uppercase tracking-[0.16em] text-blue-600">
               Secure corporate access
             </p>
 
-            <h2 className="text-3xl font-bold tracking-tight text-heading">
+            <h1 className="mt-2 text-3xl font-bold tracking-tight text-slate-950">
               Welcome back
-            </h2>
+            </h1>
 
-            <p className="mt-2 text-sm leading-6 text-muted">
-              Sign in to access encrypted files and secure sharing
-              services.
+            <p className="mt-2 text-sm leading-5 text-slate-500">
+              Sign in to access encrypted files, secure sharing,
+              approvals and security services.
             </p>
-          </div>
+          </header>
+
+          {storeError && (
+            <div
+              role="alert"
+              className="mb-4 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3"
+            >
+              <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-red-100 text-xs font-bold text-red-600">
+                !
+              </div>
+
+              <p className="text-sm leading-5 text-red-700">
+                {storeError}
+              </p>
+            </div>
+          )}
 
           <form
             onSubmit={handleSubmit}
-            className="space-y-5"
+            noValidate
+            className="space-y-4"
           >
-            {error && (
-              <div
-                role="alert"
-                className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
-              >
-                {error}
-              </div>
-            )}
-
             <div>
               <label
-                htmlFor="email"
-                className="mb-2 block text-sm font-semibold text-heading"
+                htmlFor="identifier"
+                className="mb-2 block text-sm font-semibold text-slate-800"
               >
-                Email or username
+                Username or corporate email
               </label>
 
               <div className="relative">
                 <Mail
                   size={18}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                 />
 
                 <input
-                  id="email"
+                  id="identifier"
+                  name="identifier"
                   type="text"
-                  value={email}
+                  value={form.identifier}
+                  disabled={isSubmitting}
                   onChange={(event) =>
-                    setEmail(event.target.value)
+                    updateField(
+                      "identifier",
+                      event.target.value
+                    )
                   }
-                  placeholder="Enter your corporate email"
+                  placeholder="Enter username or email"
                   autoComplete="username"
-                  className="h-11 w-full rounded-lg border border-border bg-white pl-11 pr-4 text-sm text-heading outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                  aria-invalid={
+                    Boolean(
+                      validationErrors.identifier
+                    )
+                  }
+                  className={`h-12 w-full rounded-xl border bg-white pl-12 pr-4 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 disabled:bg-slate-100 ${
+                    validationErrors.identifier
+                      ? "border-red-400 focus:ring-4 focus:ring-red-100"
+                      : "border-slate-200 hover:border-slate-300 focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+                  }`}
                 />
               </div>
+
+              {validationErrors.identifier && (
+                <p className="mt-1.5 text-xs font-medium text-red-600">
+                  {validationErrors.identifier}
+                </p>
+              )}
             </div>
 
             <div>
               <div className="mb-2 flex items-center justify-between">
                 <label
                   htmlFor="password"
-                  className="text-sm font-semibold text-heading"
+                  className="text-sm font-semibold text-slate-800"
                 >
                   Password
                 </label>
 
-                <Link
-                  to="/forgot-password"
-                  className="text-xs font-semibold text-primary hover:underline"
+                <button
+                  type="button"
+                  onClick={() =>
+                    navigate("/forgot-password")
+                  }
+                  className="text-xs font-semibold text-blue-600 transition hover:text-blue-700 hover:underline"
                 >
                   Forgot password?
-                </Link>
+                </button>
               </div>
 
               <div className="relative">
                 <LockKeyhole
                   size={18}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted"
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
                 />
 
                 <input
                   id="password"
-                  type={showPassword ? "text" : "password"}
-                  value={password}
+                  name="password"
+                  type={
+                    showPassword
+                      ? "text"
+                      : "password"
+                  }
+                  value={form.password}
+                  disabled={isSubmitting}
                   onChange={(event) =>
-                    setPassword(event.target.value)
+                    updateField(
+                      "password",
+                      event.target.value
+                    )
                   }
                   placeholder="Enter your password"
                   autoComplete="current-password"
-                  className="h-11 w-full rounded-lg border border-border bg-white pl-11 pr-11 text-sm text-heading outline-none transition placeholder:text-slate-400 focus:border-primary focus:ring-4 focus:ring-primary/10"
+                  aria-invalid={
+                    Boolean(
+                      validationErrors.password
+                    )
+                  }
+                  className={`h-12 w-full rounded-xl border bg-white pl-12 pr-12 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 disabled:bg-slate-100 ${
+                    validationErrors.password
+                      ? "border-red-400 focus:ring-4 focus:ring-red-100"
+                      : "border-slate-200 hover:border-slate-300 focus:border-blue-600 focus:ring-4 focus:ring-blue-100"
+                  }`}
                 />
 
                 <button
                   type="button"
                   onClick={() =>
-                    setShowPassword((current) => !current)
+                    setShowPassword(
+                      (current) => !current
+                    )
                   }
-                  className="absolute right-3 top-1/2 -translate-y-1/2 rounded-md p-1 text-muted hover:bg-slate-100"
+                  disabled={isSubmitting}
                   aria-label={
                     showPassword
                       ? "Hide password"
                       : "Show password"
                   }
+                  className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50"
                 >
                   {showPassword ? (
                     <EyeOff size={18} />
@@ -259,75 +346,95 @@ export default function LoginPage() {
                   )}
                 </button>
               </div>
+
+              {validationErrors.password && (
+                <p className="mt-1.5 text-xs font-medium text-red-600">
+                  {validationErrors.password}
+                </p>
+              )}
             </div>
 
-            <label className="flex items-center gap-3 text-sm text-body">
-              <input
-                type="checkbox"
-                checked={rememberDevice}
-                onChange={(event) =>
-                  setRememberDevice(event.target.checked)
-                }
-                className="h-4 w-4 rounded border-slate-300 accent-primary"
-              />
+            <div className="flex items-center justify-between gap-3">
+              <label className="flex cursor-pointer items-center gap-2.5 text-sm text-slate-600">
+                <input
+                  type="checkbox"
+                  checked={
+                    form.rememberDevice
+                  }
+                  disabled={isSubmitting}
+                  onChange={(event) =>
+                    updateField(
+                      "rememberDevice",
+                      event.target.checked
+                    )
+                  }
+                  className="h-4 w-4 rounded border-slate-300 accent-blue-600"
+                />
 
-              Remember this device
-            </label>
+                Remember this device
+              </label>
 
-            <Button
+              <div className="flex items-center gap-1.5 text-xs font-semibold text-green-700">
+                <CheckCircle2 size={14} />
+                Secure connection
+              </div>
+            </div>
+
+            <button
               type="submit"
-              size="lg"
-              loading={isLoading}
-              className="w-full"
+              disabled={isSubmitting}
+              className="flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-bold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 focus:outline-none focus:ring-4 focus:ring-blue-200 disabled:cursor-not-allowed disabled:opacity-60"
             >
-              <ShieldCheck size={18} />
-
-              Sign In Securely
-            </Button>
+              {isSubmitting ? (
+                <>
+                  <span className="h-5 w-5 animate-spin rounded-full border-2 border-white border-r-transparent" />
+                  Signing in...
+                </>
+              ) : (
+                <>
+                  <ShieldCheck size={18} />
+                  Login
+                  <ArrowRight size={17} />
+                </>
+              )}
+            </button>
           </form>
 
-          <div className="mt-7 rounded-xl border border-border bg-slate-50 p-4">
-            <p className="text-xs font-bold uppercase tracking-wide text-muted">
-              Demo accounts
-            </p>
+          <div className="my-5 flex items-center gap-4">
+            <div className="h-px flex-1 bg-slate-200" />
 
-            <div className="mt-3 space-y-2">
-              {demoAccounts.map((account) => (
-                <button
-                  key={account.email}
-                  type="button"
-                  onClick={() => {
-                    setEmail(account.email);
-                    setPassword("Secure@123");
-                    setError("");
-                  }}
-                  className="flex w-full items-center justify-between rounded-lg px-2 py-1.5 text-left text-xs transition hover:bg-white"
-                >
-                  <span className="font-medium text-body">
-                    {account.role}
-                  </span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400">
+              Or continue with
+            </span>
 
-                  <span className="text-primary">
-                    {account.email}
-                  </span>
-                </button>
-              ))}
-            </div>
-
-            <p className="mt-3 text-xs text-muted">
-              Password for every demo account:
-              <span className="ml-1 font-semibold text-heading">
-                Secure@123
-              </span>
-            </p>
+            <div className="h-px flex-1 bg-slate-200" />
           </div>
 
-          <p className="mt-7 text-center text-xs leading-5 text-muted">
-            Protected by encrypted authentication, access controls,
-            and continuous activity monitoring.
-          </p>
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={handleGoogleLogin}
+            className="flex h-11 w-full items-center justify-center gap-3 rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            <span className="flex h-7 w-7 items-center justify-center rounded-full border border-slate-200 bg-white font-bold">
+              G
+            </span>
+
+            Continue with Google Workspace
+          </button>
+
+          <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50/70 p-3">
+            <p className="text-xs font-semibold text-slate-800">
+              Protected corporate environment
+            </p>
+
+            <p className="mt-1 text-[11px] leading-4 text-slate-500">
+              Access is protected through authentication,
+              authorization, encryption and continuous monitoring.
+            </p>
+          </div>
         </div>
       </section>
-    </div>
+    </main>
   );
 }

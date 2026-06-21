@@ -1,149 +1,430 @@
-import { Navigate, Route, Routes } from "react-router";
+import {
+  Navigate,
+  Route,
+  Routes,
+} from "react-router";
 
 import AppLayout from "../layouts/AppLayout";
 import AuthLayout from "../layouts/AuthLayout";
 import ExternalGuestLayout from "../layouts/ExternalGuestLayout";
+
 import ProtectedRoute from "./ProtectedRoute";
+import PublicOnlyRoute from "./PublicOnlyRoute";
 
-const PlaceholderPage = ({ title }) => (
-  <section className="p-6">
-    <h1 className="text-2xl font-bold text-heading">{title}</h1>
+import LoginPage from "../pages/auth/LoginPage";
+import DashboardPage from "../pages/dashboard/DashboardPage";
+import NotFoundPage from "../pages/errors/NotFoundPage";
+import SystemPage from "../pages/common/SystemPage";
 
-    <div className="mt-6 rounded-card border border-border bg-surface p-6">
-      <p className="text-body">
-        This AFESS SecureShare page is ready for implementation.
-      </p>
-    </div>
-  </section>
-);
+import { systemPages } from "../config/systemPages";
 
 export default function AppRoutes() {
   return (
     <Routes>
-      {/* Public routes */}
-      <Route path="/" element={<PlaceholderPage title="Landing Page" />} />
+      <Route
+        path="/"
+        element={
+          <Navigate to="/login" replace />
+        }
+      />
 
-      {/* Authentication routes */}
-      <Route element={<AuthLayout />}>
-        <Route path="/login" element={<PlaceholderPage title="Sign In" />} />
-        <Route
-          path="/forgot-password"
-          element={<PlaceholderPage title="Forgot Password" />}
-        />
-        <Route
-          path="/verify-otp"
-          element={<PlaceholderPage title="Verify OTP" />}
-        />
+      {/* Public authentication */}
+      <Route element={<PublicOnlyRoute />}>
+        <Route element={<AuthLayout />}>
+          <Route
+            path="/login"
+            element={<LoginPage />}
+          />
+        </Route>
       </Route>
 
-      {/* External Guest */}
+      {/* External guest */}
       <Route element={<ExternalGuestLayout />}>
         <Route
           path="/external/share/:token"
-          element={<PlaceholderPage title="Secure File Access" />}
+          element={
+            <SystemPage
+              {...systemPages.secureShare}
+            />
+          }
         />
       </Route>
 
-      {/* Protected application */}
+      {/* Protected system */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/app" element={<AppLayout />}>
-          <Route index element={<Navigate to="dashboard" replace />} />
+        <Route
+          path="/app"
+          element={<AppLayout />}
+        >
+          <Route
+            index
+            element={
+              <Navigate
+                to="/app/dashboard"
+                replace
+              />
+            }
+          />
 
           <Route
             path="dashboard"
-            element={<PlaceholderPage title="Dashboard" />}
+            element={<DashboardPage />}
           />
 
-          <Route path="files">
-            <Route index element={<PlaceholderPage title="My Files" />} />
-            <Route
-              path="shared-with-me"
-              element={<PlaceholderPage title="Shared With Me" />}
-            />
-            <Route
-              path="shared-by-me"
-              element={<PlaceholderPage title="Shared By Me" />}
-            />
-            <Route
-              path="recent"
-              element={<PlaceholderPage title="Recent Files" />}
-            />
-            <Route
-              path="favorites"
-              element={<PlaceholderPage title="Favorites" />}
-            />
-            <Route path="trash" element={<PlaceholderPage title="Trash" />} />
-            <Route
-              path=":fileId"
-              element={<PlaceholderPage title="File Details" />}
-            />
-          </Route>
+          {/* Files */}
+          <Route
+            path="files"
+            element={
+              <SystemPage
+                {...systemPages.myFiles}
+              />
+            }
+          />
 
           <Route
-            path="approvals"
-            element={<PlaceholderPage title="Approval Center" />}
+            path="files/upload"
+            element={
+              <SystemPage
+                {...systemPages.upload}
+              />
+            }
+          />
+
+          <Route
+            path="files/shared-with-me"
+            element={
+              <SystemPage
+                {...systemPages.sharedWithMe}
+              />
+            }
+          />
+
+          <Route
+            path="files/shared-by-me"
+            element={
+              <SystemPage
+                {...systemPages.sharedByMe}
+              />
+            }
+          />
+
+          <Route
+            path="files/recent"
+            element={
+              <SystemPage
+                {...systemPages.recentFiles}
+              />
+            }
+          />
+
+          <Route
+            path="files/favorites"
+            element={
+              <SystemPage
+                {...systemPages.favorites}
+              />
+            }
+          />
+
+          <Route
+            path="files/trash"
+            element={
+              <SystemPage
+                {...systemPages.trash}
+              />
+            }
+          />
+
+          <Route
+            path="files/:fileId"
+            element={
+              <SystemPage
+                {...systemPages.fileDetails}
+              />
+            }
+          />
+
+          <Route
+            path="files/:fileId/versions"
+            element={
+              <SystemPage
+                {...systemPages.versionHistory}
+              />
+            }
+          />
+
+          <Route
+            path="folders"
+            element={
+              <SystemPage
+                {...systemPages.folders}
+              />
+            }
+          />
+
+          <Route
+            path="folders/:folderId"
+            element={
+              <SystemPage
+                {...systemPages.folders}
+              />
+            }
+          />
+
+          {/* Sharing */}
+          <Route
+            path="share/new"
+            element={
+              <SystemPage
+                {...systemPages.secureShare}
+              />
+            }
           />
 
           <Route
             path="secure-links"
-            element={<PlaceholderPage title="Secure Links" />}
+            element={
+              <SystemPage
+                {...systemPages.secureLinks}
+              />
+            }
           />
 
           <Route
+            path="secure-links/:linkId"
+            element={
+              <SystemPage
+                {...systemPages.secureLinks}
+              />
+            }
+          />
+
+          <Route
+            path="access-requests"
+            element={
+              <SystemPage
+                {...systemPages.accessRequests}
+              />
+            }
+          />
+
+          {/* Approvals */}
+          <Route
+            path="approvals"
+            element={
+              <SystemPage
+                {...systemPages.approvals}
+              />
+            }
+          />
+
+          <Route
+            path="approvals/:requestId"
+            element={
+              <SystemPage
+                {...systemPages.approvals}
+              />
+            }
+          />
+
+          {/* Security */}
+          <Route
             path="security/monitoring"
-            element={<PlaceholderPage title="Security Monitoring" />}
+            element={
+              <SystemPage
+                {...systemPages.monitoring}
+              />
+            }
+          />
+
+          <Route
+            path="security/alerts/:alertId"
+            element={
+              <SystemPage
+                {...systemPages.alertDetails}
+              />
+            }
           />
 
           <Route
             path="security/audit-logs"
-            element={<PlaceholderPage title="Audit Logs" />}
+            element={
+              <SystemPage
+                {...systemPages.auditLogs}
+              />
+            }
           />
 
           <Route
             path="security/encryption"
-            element={<PlaceholderPage title="Encryption Management" />}
+            element={
+              <SystemPage
+                {...systemPages.encryption}
+              />
+            }
           />
 
           <Route
+            path="security/integrity"
+            element={
+              <SystemPage
+                {...systemPages.integrity}
+              />
+            }
+          />
+
+          <Route
+            path="security/sessions"
+            element={
+              <SystemPage
+                {...systemPages.sessions}
+              />
+            }
+          />
+
+          {/* Administration */}
+          <Route
             path="admin/users"
-            element={<PlaceholderPage title="Users" />}
+            element={
+              <SystemPage
+                {...systemPages.users}
+              />
+            }
+          />
+
+          <Route
+            path="admin/users/:userId"
+            element={
+              <SystemPage
+                {...systemPages.userDetails}
+              />
+            }
           />
 
           <Route
             path="admin/roles"
-            element={<PlaceholderPage title="Roles and Permissions" />}
+            element={
+              <SystemPage
+                {...systemPages.roles}
+              />
+            }
+          />
+
+          <Route
+            path="admin/roles/:roleId"
+            element={
+              <SystemPage
+                {...systemPages.roles}
+              />
+            }
           />
 
           <Route
             path="admin/departments"
-            element={<PlaceholderPage title="Departments" />}
+            element={
+              <SystemPage
+                {...systemPages.departments}
+              />
+            }
           />
 
           <Route
+            path="admin/departments/:departmentId"
+            element={
+              <SystemPage
+                {...systemPages.departments}
+              />
+            }
+          />
+
+          <Route
+            path="admin/categories"
+            element={
+              <SystemPage
+                {...systemPages.categories}
+              />
+            }
+          />
+
+          <Route
+            path="admin/storage"
+            element={
+              <SystemPage
+                {...systemPages.storage}
+              />
+            }
+          />
+
+          {/* Reports and settings */}
+          <Route
             path="reports"
-            element={<PlaceholderPage title="Reports" />}
+            element={
+              <SystemPage
+                {...systemPages.reports}
+              />
+            }
           />
 
           <Route
             path="settings"
-            element={<PlaceholderPage title="Organization Settings" />}
+            element={
+              <SystemPage
+                {...systemPages.settings}
+              />
+            }
+          />
+
+          <Route
+            path="system-health"
+            element={
+              <SystemPage
+                {...systemPages.systemHealth}
+              />
+            }
+          />
+
+          {/* Personal */}
+          <Route
+            path="notifications"
+            element={
+              <SystemPage
+                {...systemPages.notifications}
+              />
+            }
           />
 
           <Route
             path="profile"
-            element={<PlaceholderPage title="My Profile" />}
+            element={
+              <SystemPage
+                {...systemPages.profile}
+              />
+            }
           />
 
           <Route
-            path="notifications"
-            element={<PlaceholderPage title="Notifications" />}
+            path="preferences"
+            element={
+              <SystemPage
+                {...systemPages.settings}
+              />
+            }
+          />
+
+          <Route
+            path="help"
+            element={
+              <SystemPage
+                {...systemPages.help}
+              />
+            }
           />
         </Route>
       </Route>
 
       <Route
         path="*"
-        element={<PlaceholderPage title="404 — Page Not Found" />}
+        element={<NotFoundPage />}
       />
     </Routes>
   );

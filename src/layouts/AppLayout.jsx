@@ -1,29 +1,28 @@
+import { useState } from "react";
 import { Outlet } from "react-router";
 
+import Sidebar from "../components/layout/Sidebar";
+import Topbar from "../components/layout/Topbar";
+
 export default function AppLayout() {
+  const [mobileSidebarOpen, setMobileSidebarOpen] =
+    useState(false);
+
   return (
-    <div className="min-h-screen bg-page">
-      <aside className="fixed inset-y-0 left-0 hidden w-64 bg-navy text-white lg:block">
-        <div className="border-b border-white/10 p-5">
-          <h2 className="text-lg font-bold">AFESS SecureShare</h2>
-          <p className="mt-1 text-xs text-white/65">
-            Corporate Data Protection
-          </p>
-        </div>
+    <div className="min-h-screen bg-slate-50">
+      <Sidebar
+        mobileOpen={mobileSidebarOpen}
+        onClose={() => setMobileSidebarOpen(false)}
+      />
 
-        <nav className="p-4 text-sm">
-          Sidebar navigation will be implemented from the Stitch design.
-        </nav>
-      </aside>
+      <div className="min-h-screen transition-all lg:pl-[280px]">
+        <Topbar
+          onOpenSidebar={() =>
+            setMobileSidebarOpen(true)
+          }
+        />
 
-      <div className="lg:pl-64">
-        <header className="sticky top-0 z-30 flex h-16 items-center border-b border-border bg-white px-4 lg:px-6">
-          <h1 className="font-semibold text-heading">
-            AFESS SecureShare
-          </h1>
-        </header>
-
-        <main>
+        <main className="min-h-[calc(100vh-68px)] w-full p-4 md:p-6">
           <Outlet />
         </main>
       </div>

@@ -1,159 +1,260 @@
 import {
-  FolderLock,
-  LogOut,
-  X,
+  Activity,
+  BarChart3,
+  Bell,
+  Building2,
+  FileCheck2,
+  FileClock,
+  FileHeart,
+  FileKey2,
+  FileLock2,
+  FileText,
+  Folder,
+  Gauge,
+  HardDrive,
+  HelpCircle,
+  KeyRound,
+  Link2,
+  ListChecks,
+  LockKeyhole,
+  ScrollText,
+  Settings,
+  Share2,
+  ShieldAlert,
+  Tags,
+  Trash2,
+  UserCircle,
+  Users,
 } from "lucide-react";
 
-import {
-  NavLink,
-  useNavigate,
-} from "react-router";
+const allRoles = [
+  "super_admin",
+  "organization_admin",
+  "security_officer",
+  "department_manager",
+  "employee",
+];
 
-import useAuthStore from "../../store/authStore";
-import { navigationGroups } from "../../config/navigation";
+const managers = [
+  "super_admin",
+  "organization_admin",
+  "security_officer",
+  "department_manager",
+];
 
-export default function Sidebar({
-  mobileOpen,
-  onClose,
-}) {
-  const navigate = useNavigate();
+const securityRoles = [
+  "super_admin",
+  "organization_admin",
+  "security_officer",
+];
 
-  const user = useAuthStore(
-    (state) => state.user
-  );
+const adminRoles = [
+  "super_admin",
+  "organization_admin",
+];
 
-  const logout = useAuthStore(
-    (state) => state.logout
-  );
+export const navigationGroups = [
+  {
+    label: "Overview",
+    items: [
+      {
+        label: "Dashboard",
+        path: "/app/dashboard",
+        icon: Gauge,
+        roles: allRoles,
+      },
+    ],
+  },
 
-  const visibleGroups = navigationGroups
-    .map((group) => ({
-      ...group,
-      items: group.items.filter((item) =>
-        item.roles.includes(user?.role)
-      ),
-    }))
-    .filter((group) => group.items.length > 0);
+  {
+    label: "File Workspace",
+    items: [
+      {
+        label: "My Files",
+        path: "/app/files",
+        icon: FileText,
+        roles: allRoles,
+      },
+      {
+        label: "Upload Center",
+        path: "/app/files/upload",
+        icon: FileLock2,
+        roles: allRoles,
+      },
+      {
+        label: "Shared With Me",
+        path: "/app/files/shared-with-me",
+        icon: FileCheck2,
+        roles: allRoles,
+      },
+      {
+        label: "Shared By Me",
+        path: "/app/files/shared-by-me",
+        icon: FileKey2,
+        roles: allRoles,
+      },
+      {
+        label: "Recent Files",
+        path: "/app/files/recent",
+        icon: FileClock,
+        roles: allRoles,
+      },
+      {
+        label: "Favorites",
+        path: "/app/files/favorites",
+        icon: FileHeart,
+        roles: allRoles,
+      },
+      {
+        label: "Folders",
+        path: "/app/folders",
+        icon: Folder,
+        roles: allRoles,
+      },
+      {
+        label: "Trash",
+        path: "/app/files/trash",
+        icon: Trash2,
+        roles: allRoles,
+      },
+    ],
+  },
 
-  const handleLogout = () => {
-    logout();
+  {
+    label: "Sharing Workflow",
+    items: [
+      {
+        label: "Secure Share",
+        path: "/app/share/new",
+        icon: Share2,
+        roles: allRoles,
+      },
+      {
+        label: "Approval Center",
+        path: "/app/approvals",
+        icon: ListChecks,
+        roles: allRoles,
+      },
+      {
+        label: "Secure Links",
+        path: "/app/secure-links",
+        icon: Link2,
+        roles: managers,
+      },
+      {
+        label: "Access Requests",
+        path: "/app/access-requests",
+        icon: KeyRound,
+        roles: managers,
+      },
+    ],
+  },
 
-    navigate("/login", {
-      replace: true,
-    });
-  };
+  {
+    label: "Security Center",
+    items: [
+      {
+        label: "Monitoring",
+        path: "/app/security/monitoring",
+        icon: ShieldAlert,
+        roles: securityRoles,
+      },
+      {
+        label: "Audit Logs",
+        path: "/app/security/audit-logs",
+        icon: ScrollText,
+        roles: securityRoles,
+      },
+      {
+        label: "Encryption",
+        path: "/app/security/encryption",
+        icon: FileLock2,
+        roles: securityRoles,
+      },
+      {
+        label: "Integrity",
+        path: "/app/security/integrity",
+        icon: LockKeyhole,
+        roles: securityRoles,
+      },
+      {
+        label: "Sessions",
+        path: "/app/security/sessions",
+        icon: Activity,
+        roles: allRoles,
+      },
+    ],
+  },
 
-  return (
-    <>
-      {mobileOpen && (
-        <button
-          type="button"
-          aria-label="Close sidebar overlay"
-          onClick={onClose}
-          className="fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-sm lg:hidden"
-        />
-      )}
+  {
+    label: "Administration",
+    items: [
+      {
+        label: "Users",
+        path: "/app/admin/users",
+        icon: Users,
+        roles: adminRoles,
+      },
+      {
+        label: "Roles",
+        path: "/app/admin/roles",
+        icon: UserCircle,
+        roles: adminRoles,
+      },
+      {
+        label: "Departments",
+        path: "/app/admin/departments",
+        icon: Building2,
+        roles: adminRoles,
+      },
+      {
+        label: "Categories",
+        path: "/app/admin/categories",
+        icon: Tags,
+        roles: adminRoles,
+      },
+      {
+        label: "Storage",
+        path: "/app/admin/storage",
+        icon: HardDrive,
+        roles: adminRoles,
+      },
+      {
+        label: "Reports",
+        path: "/app/reports",
+        icon: BarChart3,
+        roles: managers,
+      },
+      {
+        label: "Settings",
+        path: "/app/settings",
+        icon: Settings,
+        roles: adminRoles,
+      },
+    ],
+  },
 
-      <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-[280px] flex-col border-r border-slate-200 bg-white transition-transform duration-300 lg:translate-x-0 ${
-          mobileOpen
-            ? "translate-x-0"
-            : "-translate-x-full"
-        }`}
-      >
-        <div className="flex h-[68px] items-center justify-between border-b border-slate-200 px-5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 via-green-600 to-orange-500 text-white shadow">
-              <FolderLock size={21} />
-            </div>
-
-            <div>
-              <p className="text-sm font-bold text-slate-950">
-                AFESS SecureShare
-              </p>
-
-              <p className="text-[10px] text-slate-500">
-                Corporate Data Protection
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden"
-          >
-            <X size={19} />
-          </button>
-        </div>
-
-        <nav className="custom-scrollbar flex-1 overflow-y-auto px-3 py-4">
-          {visibleGroups.map((group) => (
-            <section
-              key={group.label}
-              className="mb-6"
-            >
-              <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.15em] text-slate-400">
-                {group.label}
-              </p>
-
-              <div className="space-y-1">
-                {group.items.map((item) => {
-                  const Icon = item.icon;
-
-                  return (
-                    <NavLink
-                      key={item.path}
-                      to={item.path}
-                      onClick={onClose}
-                      className={({ isActive }) =>
-                        `flex min-h-10 items-center gap-3 rounded-lg px-3 text-sm font-medium transition ${
-                          isActive
-                            ? "bg-blue-50 text-blue-700"
-                            : "text-slate-600 hover:bg-slate-100 hover:text-slate-950"
-                        }`
-                      }
-                    >
-                      <Icon size={18} />
-
-                      <span>{item.label}</span>
-                    </NavLink>
-                  );
-                })}
-              </div>
-            </section>
-          ))}
-        </nav>
-
-        <div className="border-t border-slate-200 p-3">
-          <div className="mb-2 flex items-center gap-3 rounded-xl bg-slate-50 p-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-600 text-sm font-bold text-white">
-              {user?.fullName
-                ?.charAt(0)
-                ?.toUpperCase() || "U"}
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-slate-900">
-                {user?.fullName}
-              </p>
-
-              <p className="truncate text-xs text-slate-500">
-                {user?.roleLabel}
-              </p>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={handleLogout}
-            className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-50"
-          >
-            <LogOut size={18} />
-            Sign Out
-          </button>
-        </div>
-      </aside>
-    </>
-  );
-}
+  {
+    label: "Account",
+    items: [
+      {
+        label: "Notifications",
+        path: "/app/notifications",
+        icon: Bell,
+        roles: allRoles,
+      },
+      {
+        label: "Profile",
+        path: "/app/profile",
+        icon: UserCircle,
+        roles: allRoles,
+      },
+      {
+        label: "Help Center",
+        path: "/app/help",
+        icon: HelpCircle,
+        roles: allRoles,
+      },
+    ],
+  },
+];

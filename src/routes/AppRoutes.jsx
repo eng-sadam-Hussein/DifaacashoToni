@@ -6,29 +6,58 @@ import {
 
 import AppLayout from "../layouts/AppLayout";
 import AuthLayout from "../layouts/AuthLayout";
-import ExternalGuestLayout from "../layouts/ExternalGuestLayout";
 
 import ProtectedRoute from "./ProtectedRoute";
 import PublicOnlyRoute from "./PublicOnlyRoute";
+import RoleRoute from "./RoleRoute";
 
 import LoginPage from "../pages/auth/LoginPage";
 import DashboardPage from "../pages/dashboard/DashboardPage";
-import NotFoundPage from "../pages/errors/NotFoundPage";
-import SystemPage from "../pages/common/SystemPage";
 
-import { systemPages } from "../config/systemPages";
+import FilesWorkspacePage from "../pages/files/FilesWorkspacePage";
+import UploadCenterPage from "../pages/files/UploadCenterPage";
+
+import SharingCenterPage from "../pages/sharing/SharingCenterPage";
+import ApprovalCenterPage from "../pages/approvals/ApprovalCenterPage";
+
+import SecurityCenterPage from "../pages/security/SecurityCenterPage";
+import AdminCenterPage from "../pages/admin/AdminCenterPage";
+
+import ReportsPage from "../pages/reports/ReportsPage";
+import SettingsPage from "../pages/settings/SettingsPage";
+
+import AccountPage from "../pages/account/AccountPage";
+import HelpPage from "../pages/help/HelpPage";
+
+import UnauthorizedPage from "../pages/errors/UnauthorizedPage";
+import NotFoundPage from "../pages/errors/NotFoundPage";
+
+const securityRoles = [
+  "super_admin",
+  "organization_admin",
+  "security_officer",
+];
+
+const adminRoles = [
+  "super_admin",
+  "organization_admin",
+];
+
+const managerRoles = [
+  "super_admin",
+  "organization_admin",
+  "security_officer",
+  "department_manager",
+];
 
 export default function AppRoutes() {
   return (
     <Routes>
       <Route
         path="/"
-        element={
-          <Navigate to="/login" replace />
-        }
+        element={<Navigate to="/login" replace />}
       />
 
-      {/* Public authentication */}
       <Route element={<PublicOnlyRoute />}>
         <Route element={<AuthLayout />}>
           <Route
@@ -38,24 +67,8 @@ export default function AppRoutes() {
         </Route>
       </Route>
 
-      {/* External guest */}
-      <Route element={<ExternalGuestLayout />}>
-        <Route
-          path="/external/share/:token"
-          element={
-            <SystemPage
-              {...systemPages.secureShare}
-            />
-          }
-        />
-      </Route>
-
-      {/* Protected system */}
       <Route element={<ProtectedRoute />}>
-        <Route
-          path="/app"
-          element={<AppLayout />}
-        >
+        <Route path="/app" element={<AppLayout />}>
           <Route
             index
             element={
@@ -71,361 +84,268 @@ export default function AppRoutes() {
             element={<DashboardPage />}
           />
 
-          {/* Files */}
           <Route
             path="files"
             element={
-              <SystemPage
-                {...systemPages.myFiles}
-              />
+              <FilesWorkspacePage mode="mine" />
             }
           />
 
           <Route
             path="files/upload"
-            element={
-              <SystemPage
-                {...systemPages.upload}
-              />
-            }
+            element={<UploadCenterPage />}
           />
 
           <Route
             path="files/shared-with-me"
             element={
-              <SystemPage
-                {...systemPages.sharedWithMe}
-              />
+              <FilesWorkspacePage mode="sharedWithMe" />
             }
           />
 
           <Route
             path="files/shared-by-me"
             element={
-              <SystemPage
-                {...systemPages.sharedByMe}
-              />
+              <FilesWorkspacePage mode="sharedByMe" />
             }
           />
 
           <Route
             path="files/recent"
             element={
-              <SystemPage
-                {...systemPages.recentFiles}
-              />
+              <FilesWorkspacePage mode="recent" />
             }
           />
 
           <Route
             path="files/favorites"
             element={
-              <SystemPage
-                {...systemPages.favorites}
-              />
+              <FilesWorkspacePage mode="favorites" />
             }
           />
 
           <Route
             path="files/trash"
             element={
-              <SystemPage
-                {...systemPages.trash}
-              />
+              <FilesWorkspacePage mode="trash" />
             }
           />
 
           <Route
             path="files/:fileId"
             element={
-              <SystemPage
-                {...systemPages.fileDetails}
-              />
+              <FilesWorkspacePage mode="mine" />
             }
           />
 
           <Route
             path="files/:fileId/versions"
             element={
-              <SystemPage
-                {...systemPages.versionHistory}
-              />
+              <FilesWorkspacePage mode="recent" />
             }
           />
 
           <Route
             path="folders"
             element={
-              <SystemPage
-                {...systemPages.folders}
-              />
+              <FilesWorkspacePage mode="folders" />
             }
           />
 
           <Route
             path="folders/:folderId"
             element={
-              <SystemPage
-                {...systemPages.folders}
-              />
+              <FilesWorkspacePage mode="mine" />
             }
           />
 
-          {/* Sharing */}
           <Route
             path="share/new"
             element={
-              <SystemPage
-                {...systemPages.secureShare}
-              />
+              <SharingCenterPage mode="new" />
             }
           />
 
           <Route
             path="secure-links"
             element={
-              <SystemPage
-                {...systemPages.secureLinks}
-              />
-            }
-          />
-
-          <Route
-            path="secure-links/:linkId"
-            element={
-              <SystemPage
-                {...systemPages.secureLinks}
-              />
+              <RoleRoute
+                allowedRoles={managerRoles}
+              >
+                <SharingCenterPage mode="links" />
+              </RoleRoute>
             }
           />
 
           <Route
             path="access-requests"
             element={
-              <SystemPage
-                {...systemPages.accessRequests}
-              />
+              <RoleRoute
+                allowedRoles={managerRoles}
+              >
+                <SharingCenterPage mode="requests" />
+              </RoleRoute>
             }
           />
 
-          {/* Approvals */}
           <Route
             path="approvals"
-            element={
-              <SystemPage
-                {...systemPages.approvals}
-              />
-            }
+            element={<ApprovalCenterPage />}
           />
 
           <Route
             path="approvals/:requestId"
-            element={
-              <SystemPage
-                {...systemPages.approvals}
-              />
-            }
+            element={<ApprovalCenterPage />}
           />
 
-          {/* Security */}
           <Route
             path="security/monitoring"
             element={
-              <SystemPage
-                {...systemPages.monitoring}
-              />
-            }
-          />
-
-          <Route
-            path="security/alerts/:alertId"
-            element={
-              <SystemPage
-                {...systemPages.alertDetails}
-              />
+              <RoleRoute
+                allowedRoles={securityRoles}
+              >
+                <SecurityCenterPage mode="monitoring" />
+              </RoleRoute>
             }
           />
 
           <Route
             path="security/audit-logs"
             element={
-              <SystemPage
-                {...systemPages.auditLogs}
-              />
+              <RoleRoute
+                allowedRoles={securityRoles}
+              >
+                <SecurityCenterPage mode="audit" />
+              </RoleRoute>
             }
           />
 
           <Route
             path="security/encryption"
             element={
-              <SystemPage
-                {...systemPages.encryption}
-              />
+              <RoleRoute
+                allowedRoles={securityRoles}
+              >
+                <SecurityCenterPage mode="encryption" />
+              </RoleRoute>
             }
           />
 
           <Route
             path="security/integrity"
             element={
-              <SystemPage
-                {...systemPages.integrity}
-              />
+              <RoleRoute
+                allowedRoles={securityRoles}
+              >
+                <SecurityCenterPage mode="integrity" />
+              </RoleRoute>
             }
           />
 
           <Route
             path="security/sessions"
             element={
-              <SystemPage
-                {...systemPages.sessions}
-              />
+              <SecurityCenterPage mode="sessions" />
             }
           />
 
-          {/* Administration */}
           <Route
             path="admin/users"
             element={
-              <SystemPage
-                {...systemPages.users}
-              />
-            }
-          />
-
-          <Route
-            path="admin/users/:userId"
-            element={
-              <SystemPage
-                {...systemPages.userDetails}
-              />
+              <RoleRoute allowedRoles={adminRoles}>
+                <AdminCenterPage mode="users" />
+              </RoleRoute>
             }
           />
 
           <Route
             path="admin/roles"
             element={
-              <SystemPage
-                {...systemPages.roles}
-              />
-            }
-          />
-
-          <Route
-            path="admin/roles/:roleId"
-            element={
-              <SystemPage
-                {...systemPages.roles}
-              />
+              <RoleRoute allowedRoles={adminRoles}>
+                <AdminCenterPage mode="roles" />
+              </RoleRoute>
             }
           />
 
           <Route
             path="admin/departments"
             element={
-              <SystemPage
-                {...systemPages.departments}
-              />
-            }
-          />
-
-          <Route
-            path="admin/departments/:departmentId"
-            element={
-              <SystemPage
-                {...systemPages.departments}
-              />
+              <RoleRoute allowedRoles={adminRoles}>
+                <AdminCenterPage mode="departments" />
+              </RoleRoute>
             }
           />
 
           <Route
             path="admin/categories"
             element={
-              <SystemPage
-                {...systemPages.categories}
-              />
+              <RoleRoute allowedRoles={adminRoles}>
+                <AdminCenterPage mode="categories" />
+              </RoleRoute>
             }
           />
 
           <Route
             path="admin/storage"
             element={
-              <SystemPage
-                {...systemPages.storage}
-              />
+              <RoleRoute allowedRoles={adminRoles}>
+                <AdminCenterPage mode="storage" />
+              </RoleRoute>
             }
           />
 
-          {/* Reports and settings */}
           <Route
             path="reports"
             element={
-              <SystemPage
-                {...systemPages.reports}
-              />
+              <RoleRoute
+                allowedRoles={managerRoles}
+              >
+                <ReportsPage />
+              </RoleRoute>
             }
           />
 
           <Route
             path="settings"
             element={
-              <SystemPage
-                {...systemPages.settings}
-              />
-            }
-          />
-
-          <Route
-            path="system-health"
-            element={
-              <SystemPage
-                {...systemPages.systemHealth}
-              />
-            }
-          />
-
-          {/* Personal */}
-          <Route
-            path="notifications"
-            element={
-              <SystemPage
-                {...systemPages.notifications}
-              />
+              <RoleRoute allowedRoles={adminRoles}>
+                <SettingsPage />
+              </RoleRoute>
             }
           />
 
           <Route
             path="profile"
-            element={
-              <SystemPage
-                {...systemPages.profile}
-              />
-            }
+            element={<AccountPage mode="profile" />}
           />
 
           <Route
             path="preferences"
             element={
-              <SystemPage
-                {...systemPages.settings}
-              />
+              <SettingsPage mode="preferences" />
+            }
+          />
+
+          <Route
+            path="notifications"
+            element={
+              <AccountPage mode="notifications" />
             }
           />
 
           <Route
             path="help"
-            element={
-              <SystemPage
-                {...systemPages.help}
-              />
-            }
+            element={<HelpPage />}
+          />
+
+          <Route
+            path="unauthorized"
+            element={<UnauthorizedPage />}
           />
         </Route>
       </Route>
 
-      <Route
-        path="*"
-        element={<NotFoundPage />}
-      />
+      <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
 }

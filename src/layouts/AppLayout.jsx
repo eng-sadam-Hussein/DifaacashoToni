@@ -9,20 +9,20 @@ export default function AppLayout() {
     useState(false);
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-app text-fg">
       <Sidebar
         mobileOpen={mobileSidebarOpen}
         onClose={() => setMobileSidebarOpen(false)}
       />
 
-      <div className="min-h-screen transition-all lg:pl-[280px]">
+      <div className="min-h-screen lg:pl-[285px]">
         <Topbar
           onOpenSidebar={() =>
             setMobileSidebarOpen(true)
           }
         />
 
-        <main className="min-h-[calc(100vh-68px)] w-full p-4 md:p-6">
+        <main className="min-h-[calc(100vh-72px)] p-4 md:p-6">
           <Outlet />
         </main>
       </div>

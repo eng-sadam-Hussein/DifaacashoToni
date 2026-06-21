@@ -3,17 +3,17 @@ import {
   BarChart3,
   Bell,
   Building2,
-  Clock3,
   FileCheck2,
   FileClock,
   FileHeart,
+  FileKey2,
   FileLock2,
   FileText,
   Folder,
+  Gauge,
   HardDrive,
   HelpCircle,
   KeyRound,
-  LayoutDashboard,
   Link2,
   ListChecks,
   LockKeyhole,
@@ -35,7 +35,7 @@ const allRoles = [
   "employee",
 ];
 
-const managementRoles = [
+const managers = [
   "super_admin",
   "organization_admin",
   "security_officer",
@@ -60,19 +60,25 @@ export const navigationGroups = [
       {
         label: "Dashboard",
         path: "/app/dashboard",
-        icon: LayoutDashboard,
+        icon: Gauge,
         roles: allRoles,
       },
     ],
   },
 
   {
-    label: "File Management",
+    label: "File Workspace",
     items: [
       {
         label: "My Files",
         path: "/app/files",
         icon: FileText,
+        roles: allRoles,
+      },
+      {
+        label: "Upload Center",
+        path: "/app/files/upload",
+        icon: FileLock2,
         roles: allRoles,
       },
       {
@@ -84,7 +90,7 @@ export const navigationGroups = [
       {
         label: "Shared By Me",
         path: "/app/files/shared-by-me",
-        icon: Share2,
+        icon: FileKey2,
         roles: allRoles,
       },
       {
@@ -115,7 +121,7 @@ export const navigationGroups = [
   },
 
   {
-    label: "Sharing & Approvals",
+    label: "Sharing Workflow",
     items: [
       {
         label: "Secure Share",
@@ -133,22 +139,22 @@ export const navigationGroups = [
         label: "Secure Links",
         path: "/app/secure-links",
         icon: Link2,
-        roles: managementRoles,
+        roles: managers,
       },
       {
         label: "Access Requests",
         path: "/app/access-requests",
         icon: KeyRound,
-        roles: managementRoles,
+        roles: managers,
       },
     ],
   },
 
   {
-    label: "Security",
+    label: "Security Center",
     items: [
       {
-        label: "Security Monitoring",
+        label: "Monitoring",
         path: "/app/security/monitoring",
         icon: ShieldAlert,
         roles: securityRoles,
@@ -166,13 +172,13 @@ export const navigationGroups = [
         roles: securityRoles,
       },
       {
-        label: "Integrity Verification",
+        label: "Integrity",
         path: "/app/security/integrity",
         icon: LockKeyhole,
         roles: securityRoles,
       },
       {
-        label: "Active Sessions",
+        label: "Sessions",
         path: "/app/security/sessions",
         icon: Activity,
         roles: allRoles,
@@ -190,7 +196,7 @@ export const navigationGroups = [
         roles: adminRoles,
       },
       {
-        label: "Roles & Permissions",
+        label: "Roles",
         path: "/app/admin/roles",
         icon: UserCircle,
         roles: adminRoles,
@@ -202,7 +208,7 @@ export const navigationGroups = [
         roles: adminRoles,
       },
       {
-        label: "Categories & Tags",
+        label: "Categories",
         path: "/app/admin/categories",
         icon: Tags,
         roles: adminRoles,
@@ -217,19 +223,13 @@ export const navigationGroups = [
         label: "Reports",
         path: "/app/reports",
         icon: BarChart3,
-        roles: managementRoles,
+        roles: managers,
       },
       {
         label: "Settings",
         path: "/app/settings",
         icon: Settings,
         roles: adminRoles,
-      },
-      {
-        label: "System Health",
-        path: "/app/system-health",
-        icon: Clock3,
-        roles: ["super_admin"],
       },
     ],
   },
@@ -244,13 +244,13 @@ export const navigationGroups = [
         roles: allRoles,
       },
       {
-        label: "My Profile",
+        label: "Profile",
         path: "/app/profile",
         icon: UserCircle,
         roles: allRoles,
       },
       {
-        label: "Help & Support",
+        label: "Help Center",
         path: "/app/help",
         icon: HelpCircle,
         roles: allRoles,

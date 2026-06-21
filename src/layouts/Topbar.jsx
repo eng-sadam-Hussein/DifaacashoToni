@@ -1,129 +1,131 @@
+import { LogOut, X } from "lucide-react";
 import {
-  Bell,
-  ChevronDown,
-  HelpCircle,
-  Menu,
-  Search,
-  ShieldAlert,
-  Upload,
-} from "lucide-react";
+  NavLink,
+  useNavigate,
+} from "react-router";
 
-import { useNavigate } from "react-router";
+import BrandLogo from "./BrandLogo";
 import useAuthStore from "../../store/authStore";
+import { navigationGroups } from "../../config/navigation";
 
-export default function Topbar({
-  onOpenSidebar,
+export default function Sidebar({
+  mobileOpen,
+  onClose,
 }) {
   const navigate = useNavigate();
 
-  const user = useAuthStore(
-    (state) => state.user
-  );
+  const user = useAuthStore((state) => state.user);
+  const logout = useAuthStore((state) => state.logout);
+
+  const visibleGroups = navigationGroups
+    .map((group) => ({
+      ...group,
+      items: group.items.filter((item) =>
+        item.roles.includes(user?.role)
+      ),
+    }))
+    .filter((group) => group.items.length > 0);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
 
   return (
-    <header className="sticky top-0 z-30 flex h-[68px] items-center border-b border-slate-200 bg-white px-4 shadow-sm md:px-6">
-      <div className="flex w-full items-center gap-3">
+    <>
+      {mobileOpen && (
         <button
           type="button"
-          onClick={onOpenSidebar}
-          className="rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
-        >
-          <Menu size={21} />
-        </button>
+          onClick={onClose}
+          className="fixed inset-0 z-40 bg-black/50 backdrop-blur-sm lg:hidden"
+          aria-label="Close sidebar"
+        />
+      )}
 
-        <div className="relative hidden w-full max-w-xl md:block">
-          <Search
-            size={17}
-            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-          />
+      <aside
+        className={`fixed inset-y-0 left-0 z-50 flex w-[285px] flex-col border-r border-line bg-surface transition-transform duration-300 lg:translate-x-0 ${
+          mobileOpen
+            ? "translate-x-0"
+            : "-translate-x-full"
+        }`}
+      >
+        <div className="flex h-[72px] items-center justify-between border-b border-line px-5">
+          <BrandLogo />
 
-          <input
-            type="search"
-            placeholder="Search files, users, alerts and resources..."
-            className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm outline-none transition focus:border-blue-600 focus:bg-white focus:ring-4 focus:ring-blue-100"
-          />
+          <button
+            type="button"
+            onClick={onClose}
+            className="rounded-xl p-2 text-muted hover:bg-elevated lg:hidden"
+          >
+            <X size={19} />
+          </button>
         </div>
 
-        <div className="ml-auto flex items-center gap-1 sm:gap-2">
-          <button
-            type="button"
-            onClick={() =>
-              navigate("/app/files/upload")
-            }
-            className="hidden h-10 items-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white transition hover:bg-blue-700 sm:flex"
-          >
-            <Upload size={17} />
-            Upload File
-          </button>
+        <nav className="custom-scrollbar flex-1 overflow-y-auto px-3 py-4">
+          {visibleGroups.map((group) => (
+            <section
+              key={group.label}
+              className="mb-6"
+            >
+              <p className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-muted">
+                {group.label}
+              </p>
 
-          <button
-            type="button"
-            onClick={() =>
-              navigate(
-                "/app/security/monitoring"
-              )
-            }
-            className="relative rounded-lg p-2.5 text-slate-600 hover:bg-slate-100"
-          >
-            <ShieldAlert size={19} />
+              <div className="space-y-1">
+                {group.items.map((item) => {
+                  const Icon = item.icon;
 
-            <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-red-500 ring-2 ring-white" />
-          </button>
+                  return (
+                    <NavLink
+                      key={item.path}
+                      to={item.path}
+                      onClick={onClose}
+                      className={({ isActive }) =>
+                        `flex min-h-10 items-center gap-3 rounded-xl px-3 text-sm font-medium transition ${
+                          isActive
+                            ? "bg-blue-500/10 text-brand-blue"
+                            : "text-muted hover:bg-elevated hover:text-fg"
+                        }`
+                      }
+                    >
+                      <Icon size={18} />
 
-          <button
-            type="button"
-            onClick={() =>
-              navigate("/app/notifications")
-            }
-            className="relative rounded-lg p-2.5 text-slate-600 hover:bg-slate-100"
-          >
-            <Bell size={19} />
+                      <span>{item.label}</span>
+                    </NavLink>
+                  );
+                })}
+              </div>
+            </section>
+          ))}
+        </nav>
 
-            <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
-              3
-            </span>
-          </button>
-
-          <button
-            type="button"
-            onClick={() =>
-              navigate("/app/help")
-            }
-            className="hidden rounded-lg p-2.5 text-slate-600 hover:bg-slate-100 sm:block"
-          >
-            <HelpCircle size={19} />
-          </button>
-
-          <button
-            type="button"
-            onClick={() =>
-              navigate("/app/profile")
-            }
-            className="ml-1 flex items-center gap-2 rounded-xl p-1.5 hover:bg-slate-100"
-          >
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-900 text-xs font-bold text-white">
-              {user?.fullName
-                ?.charAt(0)
-                ?.toUpperCase() || "U"}
+        <div className="border-t border-line p-3">
+          <div className="mb-2 flex items-center gap-3 rounded-xl bg-elevated p-3">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-brand-blue to-brand-green text-sm font-bold text-white">
+              {user?.fullName?.charAt(0) || "U"}
             </div>
 
-            <div className="hidden text-left xl:block">
-              <p className="max-w-36 truncate text-xs font-semibold text-slate-900">
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-semibold text-fg">
                 {user?.fullName}
               </p>
 
-              <p className="max-w-36 truncate text-[10px] text-slate-500">
+              <p className="truncate text-xs text-muted">
                 {user?.roleLabel}
               </p>
             </div>
+          </div>
 
-            <ChevronDown
-              size={14}
-              className="hidden text-slate-400 xl:block"
-            />
+          <button
+            type="button"
+            onClick={handleLogout}
+            className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-500/10"
+          >
+            <LogOut size={18} />
+            Sign Out
           </button>
         </div>
-      </div>
-    </header>
+      </aside>
+    </>
   );
 }
